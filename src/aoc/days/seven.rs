@@ -238,19 +238,24 @@ impl Hand {
             (_, Part::PartOne) | (false, Part::PartTwo) => simple_compute_kind(self),
             (true, Part::PartTwo) => {
                 // try all the combinations and return the max
-                // let hand = self.clone();
 
-                let j_positions = self.cards.iter().enumerate().filter_map(|(i, card)| {
-                    if card.0 == 'J' {
-                        Some(i)
-                    } else {
-                        None
-                    }
-                });
+                let j_positions_mask = self
+                    .cards
+                    .iter()
+                    .enumerate()
+                    .map(|(i, card)| (card, card.0 == 'J'))
+                    .collect_vec();
 
-                let mut kinds = vec![simple_compute_kind(&hand)];
+                let combinations = 12u32.pow(j_positions_mask.len() as u32);
 
-                for pos in j_positions {
+                let mut hand = self.clone();
+                let mut seen_kinds = vec![simple_compute_kind(&hand)];
+
+                for _ in 0..combinations {
+                    let mut current_idx =
+                }
+
+                for pos in j_positions_mask {
                     for card in 0..=12 {
                         let mut hand_mut = self.clone();
                         *hand_mut.cards.get_mut(pos).unwrap() = Card::from(card);
@@ -259,15 +264,15 @@ impl Hand {
 
                         println!("{:?} kind is {:?}", self, current_kind);
 
-                        kinds.push(current_kind.into());
+                        seen_kinds.push(current_kind.into());
                     }
                 }
 
-                let max = kinds.to_owned().into_iter().max().unwrap();
+                let max = seen_kinds.to_owned().into_iter().max().unwrap();
                 println!(
                     "the max for {:?} is {max:?} they all were: {:?}",
                     self.clone(),
-                    kinds
+                    seen_kinds
                 );
 
                 max
@@ -324,6 +329,7 @@ impl Solution for Seven {
         for c in &ordered {
             println!("{:?} -> {:?}", c, c.kind(false));
         }
+
 
         ordered
             .into_iter()
